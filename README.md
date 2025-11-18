@@ -1,4 +1,4 @@
-# Frontier LR Meta-repo
+# Project meta-repo
 
 ## TODO
 

@@ -1,0 +1,6 @@
+[submodule "submodules/mpsoc/camera-controller"]
+	path = submodules/mpsoc/camera-controller
+	url = https://github.com/shalex88/camera-service.git
+[submodule "submodules/orin/video-service"]
+	path = submodules/orin/video-service
+	url = https://github.com/shalex88/gst-pipeline-launch.git

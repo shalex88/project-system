@@ -8,7 +8,7 @@ RUN mkdir toolchain \
  && cat targetfs.tbz2.* > targetfs.tbz2 \
  && tar -I lbzip2 -xf targetfs.tbz2
 
-# Stage 2: Final image with extracted files only
+# Stage 2: Final image with extracted files and build tools
 FROM nvcr.io/nvidia/jetpack-linux-aarch64-crosscompile-x86:6.1
 
 WORKDIR /l4t
@@ -19,7 +19,17 @@ COPY --from=extractor /l4t/targetfs ./targetfs
 
 RUN rm -f toolchain.tar.bz2 targetfs.tbz2*
 
+# Install tools required for vcpkg bootstrap and building
+RUN apt-get update && apt-get install -y \
+    curl \
+    zip \
+    unzip \
+    tar \
+    git \
+    pkg-config \
+    ninja-build \
+    && rm -rf /var/lib/apt/lists/*
+
 # Set environment variable for CMake toolchain file
 ENV TOOLCHAIN=/l4t/toolchain
 ENV CMAKE_TOOLCHAIN_FILE=$TOOLCHAIN/aarch64--glibc--stable-2022.08-1/share/buildroot/toolchainfile.cmake
-ENV ROOTFS=/l4t/targetfs
