@@ -1,0 +1,65 @@
+#!/bin/bash
+
+# Script to build all submodules in parallel
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SUBMODULES_DIR="$SCRIPT_DIR/../submodules"
+
+echo "Building all submodules in parallel..."
+
+# Array to store background job PIDs and project names
+declare -a PIDS
+declare -a PROJECTS
+
+# Iterate through all directories in submodules
+for platform_dir in "$SUBMODULES_DIR"/*; do
+    if [ -d "$platform_dir" ]; then
+        platform_name=$(basename "$platform_dir")
+        
+        # Iterate through all subdirectories in the platform
+        for project_dir in "$platform_dir"/*; do
+            if [ -d "$project_dir" ]; then
+                project_name=$(basename "$project_dir")
+                build_script="$project_dir/build.sh"
+                
+                if [ -f "$build_script" ]; then
+                    echo "Starting build: $platform_name/$project_name"
+                    (
+                        cd "$project_dir" || exit 1
+                        bash build.sh > /dev/null 2>&1
+                    ) &
+                    PIDS+=($!)
+                    PROJECTS+=("$platform_name/$project_name")
+                else
+                    echo "⊘ Skipping $platform_name/$project_name (no build.sh found)"
+                fi
+            fi
+        done
+    fi
+done
+
+# Wait for all background jobs and collect results
+echo ""
+echo "Waiting for all builds to complete..."
+failed_count=0
+success_count=0
+
+for i in "${!PIDS[@]}"; do
+    pid=${PIDS[$i]}
+    project=${PROJECTS[$i]}
+    
+    if wait "$pid"; then
+        echo "✓ $project built successfully"
+        ((success_count++))
+    else
+        echo "✗ $project build failed"
+        ((failed_count++))
+    fi
+done
+
+echo ""
+echo "Build process completed."
+echo "Summary: $success_count succeeded, $failed_count failed"
+
+cd "$SCRIPT_DIR" || exit
+exit $failed_count
+
