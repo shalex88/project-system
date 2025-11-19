@@ -14,9 +14,9 @@ show_usage() {
     echo "Examples:"
     echo "  $0                                    # Run container with existing image"
     echo "  $0 --update                          # Rebuild image and run container"
-    echo "  $0 --args \"-v /host:/workspace\"      # Run with additional volume mount"
+    echo "  $0 --args \"-v $(pwd):/workspace\"      # Run with additional volume mount"
     echo "  $0 --exec \"echo hello\"               # Run a command inside the container"
-    echo "  $0 --args \"-v /host:/workspace\" --exec \"ls /workspace\"  # Combined options"
+    echo "  $0 --args \"-v $(pwd):/workspace\" --exec \"ls /workspace\"  # Combined options"
 }
 
 CURRENT_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -74,20 +74,36 @@ if ! docker image inspect "$IMAGE_NAME" >/dev/null 2>&1 || [ "$UPDATE_IMAGE" = t
     else
         echo "Building Docker image: $IMAGE_NAME"
     fi
-    docker build -t "$IMAGE_NAME" -f "$DOCKERFILE_PATH" "$DOCKERFILE_DIR"
+    docker build -t "$IMAGE_NAME" \
+        --build-arg USER_ID=$(id -u) \
+        --build-arg GROUP_ID=$(id -g) \
+        --build-arg USERNAME=$(whoami) \
+        -f "$DOCKERFILE_PATH" "$DOCKERFILE_DIR"
     echo "Docker image $IMAGE_NAME built successfully."
+    
+    # If only updating, exit without running the container
+    if [ "$UPDATE_IMAGE" = true ] && [ -z "$EXEC_COMMAND" ] && [ -z "$DOCKER_ARGS" ]; then
+        exit 0
+    fi
+fi
+
+# Detect if we have a TTY available - if not, don't use -it
+if [ -t 0 ]; then
+    DOCKER_TTY_FLAG="-it"
+else
+    DOCKER_TTY_FLAG=""
 fi
 
 if [[ -n "$EXEC_COMMAND" ]]; then
     if [[ -n "$DOCKER_ARGS" ]]; then
-        docker run -it --rm --privileged --net=host -v /dev/bus/usb:/dev/bus/usb $DOCKER_ARGS $IMAGE_NAME $EXEC_COMMAND
+        docker run $DOCKER_TTY_FLAG --rm --privileged --net=host -v /dev/bus/usb:/dev/bus/usb $DOCKER_ARGS $IMAGE_NAME $EXEC_COMMAND
     else
-        docker run -it --rm --privileged --net=host -v /dev/bus/usb:/dev/bus/usb $IMAGE_NAME $EXEC_COMMAND
+        docker run $DOCKER_TTY_FLAG --rm --privileged --net=host -v /dev/bus/usb:/dev/bus/usb $IMAGE_NAME $EXEC_COMMAND
     fi
 else
     if [[ -n "$DOCKER_ARGS" ]]; then
-        docker run -it --rm --privileged --net=host -v /dev/bus/usb:/dev/bus/usb $DOCKER_ARGS $IMAGE_NAME
+        docker run $DOCKER_TTY_FLAG --rm --privileged --net=host -v /dev/bus/usb:/dev/bus/usb $DOCKER_ARGS $IMAGE_NAME
     else
-        docker run -it --rm --privileged --net=host -v /dev/bus/usb:/dev/bus/usb $IMAGE_NAME
+        docker run $DOCKER_TTY_FLAG --rm --privileged --net=host -v /dev/bus/usb:/dev/bus/usb $IMAGE_NAME
     fi
 fi

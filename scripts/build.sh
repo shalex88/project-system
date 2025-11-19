@@ -37,23 +37,50 @@ for platform_dir in "$SUBMODULES_DIR"/*; do
     fi
 done
 
-# Wait for all background jobs and collect results
+# Wait for all background jobs and collect results as they complete
 echo ""
-echo "Waiting for all builds to complete..."
+echo "Waiting for builds to complete..."
 failed_count=0
 success_count=0
+total_builds=${#PIDS[@]}
+completed_count=0
 
+# Create associative arrays to track completion
+declare -A pid_to_index
 for i in "${!PIDS[@]}"; do
-    pid=${PIDS[$i]}
-    project=${PROJECTS[$i]}
+    pid_to_index[${PIDS[$i]}]=$i
+done
+
+# Monitor processes as they complete
+while [ $completed_count -lt $total_builds ]; do
+    for pid in "${!pid_to_index[@]}"; do
+        # Check if process is still running
+        if ! kill -0 "$pid" 2>/dev/null; then
+            # Process has finished, get its exit status
+            wait "$pid"
+            exit_status=$?
+            
+            # Get the index and project name
+            i=${pid_to_index[$pid]}
+            project=${PROJECTS[$i]}
+            
+            # Display result immediately
+            if [ $exit_status -eq 0 ]; then
+                echo "✓ $project built successfully"
+                ((success_count++))
+            else
+                echo "✗ $project build failed"
+                ((failed_count++))
+            fi
+            
+            # Remove from tracking
+            unset pid_to_index[$pid]
+            ((completed_count++))
+        fi
+    done
     
-    if wait "$pid"; then
-        echo "✓ $project built successfully"
-        ((success_count++))
-    else
-        echo "✗ $project build failed"
-        ((failed_count++))
-    fi
+    # Small sleep to avoid busy-waiting
+    [ $completed_count -lt $total_builds ] && sleep 0.1
 done
 
 echo ""
