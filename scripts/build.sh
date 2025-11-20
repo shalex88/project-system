@@ -3,6 +3,13 @@
 # Script to build all submodules in parallel
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SUBMODULES_DIR="$SCRIPT_DIR/../submodules"
+SUBMODULE_BUILD_SCRIPT="scripts/build.sh"
+
+BUILD_TYPE=$1
+if [ -z "$BUILD_TYPE" ] || [ "$BUILD_TYPE" != "native" ] && [ "$BUILD_TYPE" != "cross" ]; then
+    echo "Error: Invalid or missing build type. Use 'native' or 'cross'." >&2
+    exit 1
+fi
 
 echo "Building all submodules in parallel..."
 
@@ -19,18 +26,18 @@ for platform_dir in "$SUBMODULES_DIR"/*; do
         for project_dir in "$platform_dir"/*; do
             if [ -d "$project_dir" ]; then
                 project_name=$(basename "$project_dir")
-                build_script="$project_dir/build.sh"
+                build_script="$project_dir/$SUBMODULE_BUILD_SCRIPT"
                 
                 if [ -f "$build_script" ]; then
                     echo "Starting build: $platform_name/$project_name"
                     (
                         cd "$project_dir" || exit 1
-                        bash build.sh > /dev/null 2>&1
+                        bash "$SUBMODULE_BUILD_SCRIPT" "$BUILD_TYPE" > /dev/null 2>&1
                     ) &
                     PIDS+=($!)
                     PROJECTS+=("$platform_name/$project_name")
                 else
-                    echo "⊘ Skipping $platform_name/$project_name (no build.sh found)"
+                    echo "⊘ Skipping $platform_name/$project_name (no build script found)"
                 fi
             fi
         done
@@ -52,7 +59,7 @@ for i in "${!PIDS[@]}"; do
 done
 
 # Monitor processes as they complete
-while [ $completed_count -lt $total_builds ]; do
+while [ $completed_count -lt "$total_builds" ]; do
     for pid in "${!pid_to_index[@]}"; do
         # Check if process is still running
         if ! kill -0 "$pid" 2>/dev/null; then
@@ -74,13 +81,13 @@ while [ $completed_count -lt $total_builds ]; do
             fi
             
             # Remove from tracking
-            unset pid_to_index[$pid]
+            unset "pid_to_index[$pid]"
             ((completed_count++))
         fi
     done
     
     # Small sleep to avoid busy-waiting
-    [ $completed_count -lt $total_builds ] && sleep 0.1
+    [ $completed_count -lt "$total_builds" ] && sleep 0.1
 done
 
 echo ""
