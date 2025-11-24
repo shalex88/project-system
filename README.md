@@ -1,5 +1,11 @@
 # Project meta-repo
 
+## Download
+
+```bash
+git clone https://github.com/shalex88/project-system.git --recurse-submodules
+```
+
 ## Native
 
 ```bash
