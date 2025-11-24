@@ -1,5 +1,25 @@
 # Project meta-repo
 
+## Native
+
+```bash
+#Build
+./scripts/build.sh native
+#Install to /tmp/project
+./scripts/install.sh
+```
+
+## Cross
+
+```bash
+#Build
+./scripts/build.sh cross
+#Create package
+./scripts/package.sh
+#Deploy
+./scripts/deploy.sh XX.XX.XX.XX
+```
+
 ## TODO
 
 - [ ] Mpsoc SDK, what about it?; Decide how to get/install toolchains
