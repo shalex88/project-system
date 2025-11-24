@@ -32,3 +32,4 @@ git clone https://github.com/shalex88/project-system.git --recurse-submodules
 - [ ] Support packaging
 - [ ] Build files should be simple and generic, the logic should be in toolchain env setup scripts
 - [ ] Test the Orin CC binary on the target
+- [ ] Fail if build script does find subdir build.sh files; currently it just skips them
