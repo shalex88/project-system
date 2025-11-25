@@ -32,7 +32,7 @@ for platform_dir in "$SUBMODULES_DIR"/*; do
                     echo "Starting build: $platform_name/$project_name"
                     (
                         cd "$project_dir" || exit 1
-                        bash "$SUBMODULE_BUILD_SCRIPT" "$BUILD_TYPE"
+                        bash "$SUBMODULE_BUILD_SCRIPT" "$BUILD_TYPE" > /dev/null 2>&1
                     ) &
                     PIDS+=($!)
                     PROJECTS+=("$platform_name/$project_name")

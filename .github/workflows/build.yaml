@@ -4,6 +4,9 @@ on:
   push:
   pull_request:
 
+env:
+  BUILD_TYPE: Release
+
 jobs:
   build:
     runs-on: ubuntu-latest
