@@ -21,18 +21,18 @@ declare -a PROJECTS
 for platform_dir in "$SUBMODULES_DIR"/*; do
     if [ -d "$platform_dir" ]; then
         platform_name=$(basename "$platform_dir")
-        
+
         # Iterate through all subdirectories in the platform
         for project_dir in "$platform_dir"/*; do
             if [ -d "$project_dir" ]; then
                 project_name=$(basename "$project_dir")
                 build_script="$project_dir/$SUBMODULE_BUILD_SCRIPT"
-                
+
                 if [ -f "$build_script" ]; then
                     echo "Starting build: $platform_name/$project_name"
                     (
                         cd "$project_dir" || exit 1
-                        bash "$SUBMODULE_BUILD_SCRIPT" "$BUILD_TYPE" > /dev/null 2>&1
+                        bash "$SUBMODULE_BUILD_SCRIPT" "$BUILD_TYPE"
                     ) &
                     PIDS+=($!)
                     PROJECTS+=("$platform_name/$project_name")
@@ -66,11 +66,11 @@ while [ $completed_count -lt "$total_builds" ]; do
             # Process has finished, get its exit status
             wait "$pid"
             exit_status=$?
-            
+
             # Get the index and project name
             i=${pid_to_index[$pid]}
             project=${PROJECTS[$i]}
-            
+
             # Display result immediately
             if [ $exit_status -eq 0 ]; then
                 echo "✓ $project built successfully"
@@ -79,13 +79,13 @@ while [ $completed_count -lt "$total_builds" ]; do
                 echo "✗ $project build failed"
                 ((failed_count++))
             fi
-            
+
             # Remove from tracking
             unset "pid_to_index[$pid]"
             ((completed_count++))
         fi
     done
-    
+
     # Small sleep to avoid busy-waiting
     [ $completed_count -lt "$total_builds" ] && sleep 0.1
 done
