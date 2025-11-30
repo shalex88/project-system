@@ -66,6 +66,3 @@ set(ENV{PKG_CONFIG_PATH}
 # Prevent CMake from using target executables (gmake, pkg-config, python)
 # ------------------------------------------------------------------
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
-# Let vcpkg manage library/include paths
-
-set(VCPKG_TARGET_TRIPLET "arm64-linux-release")

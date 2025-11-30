@@ -8,3 +8,6 @@ if [ ! -f "/.dockerenv" ]; then
     export USE_DOCKER_BUILD=1
     export DOCKER_TOOLCHAIN_DIR="$TOOLCHAIN_DIR"
 fi
+
+export VCPKG_TARGET_TRIPLET="arm64-linux-release"
+export VCPKG_FORCE_SYSTEM_BINARIES=1
