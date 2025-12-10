@@ -18,12 +18,14 @@ git clone https://github.com/shalex88/project-system.git --recurse-submodules
 ## Cross
 
 ```bash
-#Build
+# Build all submodules for cross (arm64)
 ./scripts/build.sh cross
-#Create package
-./scripts/package.sh
-#Deploy
-./scripts/deploy.sh XX.XX.XX.XX
+
+# Create deployment bundle
+./scripts/package.sh cross
+
+# Deploy to Orin and forward MPSOC installation
+./scripts/deploy.sh --orin fronti@fronti-elsec.local --mpsoc root@frontier-peripheral-ctrl-mpsoc.local
 ```
 
 ## TODO
@@ -36,3 +38,4 @@ git clone https://github.com/shalex88/project-system.git --recurse-submodules
 - [ ] Add version argument to build.sh?
 - [ ] How to insure only main branch is checked out in submodules?
 - [ ] Use cmake install neccessery tools like ninja before build?
+- [ ] Use project scope variables to expose project root, build type, architecture, files paths?

@@ -11,7 +11,16 @@ if [ -z "$BUILD_TYPE" ] || [ "$BUILD_TYPE" != "native" ] && [ "$BUILD_TYPE" != "
     exit 1
 fi
 
+# Set default INSTALL_ROOT if not provided
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+PROJECT_NAME=$(basename "$PROJECT_ROOT")
+: "${INSTALL_ROOT:=/opt/$PROJECT_NAME}"
+
+# Export for child build scripts
+export INSTALL_ROOT
+
 echo "Building all submodules in parallel..."
+echo "INSTALL_ROOT: $INSTALL_ROOT"
 
 # Array to store background job PIDs and project names
 declare -a PIDS
