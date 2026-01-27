@@ -39,3 +39,5 @@ git clone https://github.com/shalex88/project-system.git --recurse-submodules
 - [ ] How to insure only main branch is checked out in submodules?
 - [ ] Use cmake install neccessery tools like ninja before build?
 - [ ] Use project scope variables to expose project root, build type, architecture, files paths?
+- [ ] Add post install to install neccessery runtime dependencies. gst plugins, nodejs, etc.
+- [ ] Add the fullstack app

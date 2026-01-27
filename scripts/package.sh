@@ -50,34 +50,30 @@ for platform_dir in "$PROJECT_ROOT/submodules"/*; do
     if [ -d "$platform_dir" ]; then
         platform_name=$(basename "$platform_dir")
         
-        for project_dir in "$platform_dir"/*; do
-            if [ -d "$project_dir" ]; then
-                build_path="$project_dir/$BUILD_DIR"
-                
-                if [ -d "$build_path" ]; then
-                    # Find .deb files in the build directory (excluding _CPack_Packages subdirs)
-                    while IFS= read -r -d '' deb_file; do
-                        if [[ ! "$deb_file" =~ _CPack_Packages ]]; then
-                            echo "  Found: $(basename "$deb_file")"
-                            # Copy into per-platform local repo
-                            dest_repo="$ORIN_DIR/local-repo"
-                            [ "$platform_name" == "mpsoc" ] && dest_repo="$MPSOC_DIR/local-repo"
-                            cp "$deb_file" "$dest_repo/"
-                            ((DEB_COUNT++))
-                            
-                            # Extract package info for RELEASE.yaml
-                            deb_basename=$(basename "$deb_file")
-                            deb_name=$(echo "$deb_basename" | sed 's/_[0-9].*//')
-                            deb_version=$(echo "$deb_basename" | sed -n 's/.*_\([0-9][^_]*\)_.*/\1/p')
-                            # Append to platform-specific list
-                            PLATFORM_PACKAGES["$platform_name"]+=$'    - name: '"$deb_name"$'\n'
-                            PLATFORM_PACKAGES["$platform_name"]+=$'      version: '"$deb_version"$'\n'
-                            PLATFORM_PACKAGES["$platform_name"]+=$'      file: '"$deb_basename"$'\n'
-                        fi
-                    done < <(find "$build_path" -maxdepth 1 -name "*.deb" -type f -print0)
+        # Recursively find all build directories (build-cross or build-native)
+        while IFS= read -r build_path; do
+            # Find .deb files in the build directory and subdirectories
+            while IFS= read -r -d '' deb_file; do
+                # Skip files in _CPack_Packages subdirectories
+                if [[ ! "$deb_file" =~ _CPack_Packages ]]; then
+                    echo "  Found: $(basename "$deb_file")"
+                    # Copy into per-platform local repo
+                    dest_repo="$ORIN_DIR/local-repo"
+                    [ "$platform_name" == "mpsoc" ] && dest_repo="$MPSOC_DIR/local-repo"
+                    cp "$deb_file" "$dest_repo/"
+                    ((DEB_COUNT++))
+                    
+                    # Extract package info for RELEASE.yaml
+                    deb_basename=$(basename "$deb_file")
+                    deb_name=$(echo "$deb_basename" | sed 's/_[0-9].*//')
+                    deb_version=$(echo "$deb_basename" | sed -n 's/.*_\([0-9][^_]*\)_.*/\1/p')
+                    # Append to platform-specific list
+                    PLATFORM_PACKAGES["$platform_name"]+=$'    - name: '"$deb_name"$'\n'
+                    PLATFORM_PACKAGES["$platform_name"]+=$'      version: '"$deb_version"$'\n'
+                    PLATFORM_PACKAGES["$platform_name"]+=$'      file: '"$deb_basename"$'\n'
                 fi
-            fi
-        done
+            done < <(find "$build_path" -name "*.deb" -type f -print0)
+        done < <(find "$platform_dir" -type d -name "$BUILD_DIR")
     fi
 done
 

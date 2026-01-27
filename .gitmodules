@@ -4,3 +4,6 @@
 [submodule "submodules/orin/video-player"]
 	path = submodules/orin/video-player
 	url = https://github.com/shalex88/video-player.git
+[submodule "submodules/orin/gst-plugins"]
+	path = submodules/orin/gst-plugins
+	url = https://github.com/shalex88/gst-plugins.git
