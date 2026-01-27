@@ -7,3 +7,6 @@
 [submodule "submodules/orin/gst-plugins"]
 	path = submodules/orin/gst-plugins
 	url = https://github.com/shalex88/gst-plugins.git
+[submodule "submodules/orin/project-fullstack"]
+	path = submodules/orin/project-fullstack
+	url = https://github.com/shalex88/project-fullstack.git
