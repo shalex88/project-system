@@ -30,11 +30,14 @@ git clone https://github.com/shalex88/project-system.git --recurse-submodules
 
 ## TODO
 
-- [ ] Mpsoc SDK, what about it?; Decide how to get/install toolchains
-- [ ] Fail if build script does find subdir build.sh files; currently it just skips them
+- [ ] Upload SDKs to Artifactory
 - [ ] Add version argument to build.sh?
 - [ ] How to insure only main branch is checked out in submodules?
-- [ ] Use cmake install neccessery tools like ninja before build?
 - [ ] Use project scope variables to expose project root, build type, architecture, files paths?
 - [ ] Add post install to install neccessery runtime dependencies. gst plugins, nodejs, etc.
 - [ ] CI will fail because gst-plugins can't be build natively
+- [ ] Migrate to Orin Yocto SDK instead of the docker
+- [ ] Use grpc with native resolver to resolve mDNS 'export GRPC_DNS_RESOLVER=native'
+- [ ] ./grpcurl_run.sh 172.25.125.10:50051 "core.v1.CoreService/GetInfo" '{"cameraId": 1}' '/mnt/bsp/projects/project-system/submodules/orin/sensor-core/proto/core_service.proto'
+- [ ] sudo chown -R $USER:$USER *
+- [ ] Triggering video-player through ssh causes errors

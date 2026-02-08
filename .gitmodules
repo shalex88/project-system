@@ -10,3 +10,6 @@
 [submodule "submodules/orin/project-fullstack"]
 	path = submodules/orin/project-fullstack
 	url = https://github.com/shalex88/project-fullstack.git
+[submodule "submodules/orin/sensor-core"]
+	path = submodules/orin/sensor-core
+	url = https://github.com/shalex88/sensor-core.git
