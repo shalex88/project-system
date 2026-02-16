@@ -33,7 +33,6 @@ git clone https://github.com/shalex88/project-system.git --recurse-submodules
 - [ ] Upload SDKs to Artifactory
 - [ ] Add version argument to build.sh?
 - [ ] How to insure only main branch is checked out in submodules?
-- [ ] Use project scope variables to expose project root, build type, architecture, files paths?
 - [ ] Add post install to install neccessery runtime dependencies. gst plugins, nodejs, etc.
 - [ ] CI will fail because gst-plugins can't be build natively
 - [ ] Migrate to Orin Yocto SDK instead of the docker
@@ -41,3 +40,6 @@ git clone https://github.com/shalex88/project-system.git --recurse-submodules
 - [ ] ./grpcurl_run.sh 172.25.125.10:50051 "core.v1.CoreService/GetInfo" '{"cameraId": 1}' '/mnt/bsp/projects/project-system/submodules/orin/sensor-core/proto/core_service.proto'
 - [ ] sudo chown -R $USER:$USER *
 - [ ] Triggering video-player through ssh causes errors
+- [ ] Use cmake presets
+- [ ] Are capabilities properly used? Hence we still expose API of the non existing capabilities?
+- [ ] Failed to set zoom min/max becuse of the timeout
