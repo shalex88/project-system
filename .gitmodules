@@ -13,3 +13,6 @@
 [submodule "submodules/orin/sensor-core"]
 	path = submodules/orin/sensor-core
 	url = https://github.com/shalex88/sensor-core.git
+[submodule "submodules/orin/media-server"]
+	path = submodules/orin/media-server
+	url = https://github.com/shalex88/media-server.git
