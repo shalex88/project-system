@@ -7,7 +7,3 @@ if [ ! -r "${TOOLCHAIN_ENV}" ]; then
 fi
 
 source "${TOOLCHAIN_ENV}"
-export VCPKG_OVERLAY_TRIPLETS="/mnt/bsp/projects/project-system/toolchains/aarch64-xilinx-linux-gcc/"
-export VCPKG_TARGET_TRIPLET="arm64-xilinx-linux"
-export VCPKG_CHAINLOAD_TOOLCHAIN_FILE="${OE_CMAKE_TOOLCHAIN_FILE}"
-export VCPKG_FORCE_SYSTEM_BINARIES=1

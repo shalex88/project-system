@@ -1,13 +1,9 @@
-# amd64-nvidia-linux-gcc
+# aarch64-nvidia-linux-gcc
 
-Nvidia Linux GCC toolchain for L4T.
+Yocto SKD-based toolchain for NVIDIA Orin AGX
 
 ## Version
 
-[L4T 36.4.4 (JetPack 6.2.1)](https://developer.nvidia.com/embedded/jetson-linux)
+L4T BSP layer - L4T R36.5.0/JetPack 6.2.2
 
-GCC 11.3
-
-## Setup
-
-Extract the toolchain and run `relocate-sdk.sh` inside it
+GCC 13.4
