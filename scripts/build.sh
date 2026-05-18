@@ -11,6 +11,12 @@ if [ -z "$BUILD_TYPE" ] || [ "$BUILD_TYPE" != "native" ] && [ "$BUILD_TYPE" != "
     exit 1
 fi
 
+BUILD_MODE=$2
+if [ -z "$BUILD_MODE" ] || [ "$BUILD_MODE" != "debug" ] && [ "$BUILD_MODE" != "release" ]; then
+    echo "Error: Invalid or missing build mode. Use 'debug' or 'release'." >&2
+    exit 1
+fi
+
 # Set default INSTALL_ROOT if not provided
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 PROJECT_NAME=$(basename "$PROJECT_ROOT")
@@ -21,10 +27,13 @@ export INSTALL_ROOT
 
 echo "Building all submodules in parallel..."
 echo "INSTALL_ROOT: $INSTALL_ROOT"
+echo "Build type: $BUILD_TYPE"
+echo "Build mode: $BUILD_MODE"
 
-# Array to store background job PIDs and project names
+# Array to store background job PIDs, project names, and log file paths
 declare -a PIDS
 declare -a PROJECTS
+declare -a LOG_PATHS
 
 # Iterate through all directories in submodules
 for platform_dir in "$SUBMODULES_DIR"/*; do
@@ -39,12 +48,16 @@ for platform_dir in "$SUBMODULES_DIR"/*; do
 
                 if [ -f "$build_script" ]; then
                     echo "Starting build: $platform_name/$project_name"
+                    # Create build directory if it doesn't exist
+                    mkdir -p "$project_dir/build"
+                    log_file="$project_dir/build/build.log"
                     (
                         cd "$project_dir" || exit 1
-                        bash "$SUBMODULE_BUILD_SCRIPT" "$BUILD_TYPE" > /dev/null 2>&1
+                        bash "$SUBMODULE_BUILD_SCRIPT" "$BUILD_TYPE" "$BUILD_MODE" > "$log_file" 2>&1
                     ) &
                     PIDS+=($!)
                     PROJECTS+=("$platform_name/$project_name")
+                    LOG_PATHS+=("$log_file")
                 else
                     echo "⊘ Skipping $platform_name/$project_name (no build script found)"
                 fi
@@ -86,6 +99,7 @@ while [ $completed_count -lt "$total_builds" ]; do
                 ((success_count++))
             else
                 echo "✗ $project build failed"
+                echo "  Log: ${LOG_PATHS[$i]}"
                 ((failed_count++))
             fi
 

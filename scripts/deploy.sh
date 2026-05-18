@@ -6,11 +6,13 @@ set -euo pipefail
 
 usage() {
 	cat <<EOF
-Usage: $(basename "$0") --orin <user@host> [--mpsoc <user@host>]
+Usage: $(basename "$0") --orin <user@host> [--mpsoc <user@host>] [--build-type <native|cross>] [--build-mode <debug|release>]
 
 Options:
   --orin <user@host>   Target for Orin (main platform)
   --mpsoc <user@host>  Target for MPSOC (secondary platform, optional)
+	--build-type <type>  Build type used in bundle name (default: cross)
+	--build-mode <mode>  Build mode used in bundle name (default: debug)
 
 Examples:
   # Deploy to Orin only
@@ -18,12 +20,17 @@ Examples:
 
   # Deploy to Orin and forward MPSOC install
   $(basename "$0") --orin user@192.168.1.10 --mpsoc user@192.168.1.20
+
+  # Deploy cross release bundle
+  $(basename "$0") --orin user@192.168.1.10 --build-type cross --build-mode release
 EOF
 	exit 1
 }
 
 ORIN_TARGET=""
 MPSOC_TARGET=""
+BUILD_TYPE="cross"
+BUILD_MODE="debug"
 
 while [[ $# -gt 0 ]]; do
 	case "$1" in
@@ -33,6 +40,14 @@ while [[ $# -gt 0 ]]; do
 			;;
 		--mpsoc)
 			MPSOC_TARGET="$2"
+			shift 2
+			;;
+		--build-type)
+			BUILD_TYPE="$2"
+			shift 2
+			;;
+		--build-mode)
+			BUILD_MODE="$2"
 			shift 2
 			;;
 		*)
@@ -47,16 +62,30 @@ if [ -z "$ORIN_TARGET" ]; then
 	usage
 fi
 
+if [ "$BUILD_TYPE" != "native" ] && [ "$BUILD_TYPE" != "cross" ]; then
+	echo "Error: --build-type must be 'native' or 'cross'" >&2
+	usage
+fi
+
+if [ "$BUILD_MODE" != "debug" ] && [ "$BUILD_MODE" != "release" ]; then
+	echo "Error: --build-mode must be 'debug' or 'release'" >&2
+	usage
+fi
+
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 VERSION=$(cat "$PROJECT_ROOT/VERSION")
 PROJECT_NAME=$(basename "$PROJECT_ROOT")
-ARCH="arm64"
-PACKAGE_NAME="$PROJECT_NAME-$VERSION-$ARCH"
+if [ "$BUILD_TYPE" == "cross" ]; then
+	ARCH="arm64"
+else
+	ARCH="amd64"
+fi
+PACKAGE_NAME="$PROJECT_NAME-$VERSION-$ARCH-$BUILD_TYPE-$BUILD_MODE"
 BUNDLE_FILE="$PROJECT_ROOT/package/$PACKAGE_NAME.bundle"
 
 if [ ! -f "$BUNDLE_FILE" ]; then
 	echo "Error: Bundle not found at $BUNDLE_FILE" >&2
-	echo "Run 'scripts/package.sh cross' first." >&2
+	echo "Run 'scripts/package.sh $BUILD_TYPE $BUILD_MODE' first." >&2
 	exit 1
 fi
 

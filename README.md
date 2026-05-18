@@ -19,13 +19,13 @@ git clone https://github.com/shalex88/project-system.git --recurse-submodules
 
 ```bash
 # Build all submodules for cross (arm64)
-./scripts/build.sh cross
+./scripts/build.sh cross release
 
 # Create deployment bundle
-./scripts/package.sh cross
+./scripts/package.sh cross release
 
 # Deploy to Orin and forward MPSOC installation
-./scripts/deploy.sh --orin fronti@fronti-elsec.local --mpsoc root@frontier-peripheral-ctrl-mpsoc.local
+./scripts/deploy.sh --build-type cross --build-mode release --orin root@jetson-agx-orin-devkit.local --mpsoc root@frontier-peripheral-ctrl-mpsoc.local
 ```
 
 ## TODO
